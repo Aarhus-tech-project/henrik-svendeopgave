@@ -1,0 +1,51 @@
+{% load static tailwind_tags %}
+            <!DOCTYPE html>
+            {% load static %}
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>CoinControl</title>
+                {% tailwind_css %}
+                <script type='text/javascript'>
+                    function getToken(name) {
+                        var cookieValue = null;
+                        if (document.cookie && document.cookie !== '') {
+                            var cookies = document.cookie.split(';');
+                            for (let i = 0; i < cookies.length; i++) {
+                                var cookie = cookies[i].trim();
+                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                };
+                            };
+                        };
+                        return cookieValue;
+                    };
+                </script>
+            </head>
+            <body>
+
+                {% block navbar %}
+                    <nav class='flex-nowrap relative flex w-full items-center justify-between py-2 border-b border-black'>
+                        <div class='flex w-full flex-wrap items-center px-3'>
+                            <h1 class='inline-block text-3xl text-gray-400 mx-5'>CoinControl</h1>
+                        </div>
+                        <div class='flex flex-grow justify-end' id='userActions'>
+                            <button onclick='showOptions()' class='inline-block h-7 text-[2.25rem] text-black hover:text-opacity-70 mt-[-1.1rem] mr-5 z-50' id='addTaskBtn'>+</button>
+                            <h2 class='inline-block justify-end text-lg right-0 mr-5' id='userName'>Username</h2>
+                        </div>
+                    </nav>
+                {% endblock navbar %}
+                
+                <div class='container p-10'>
+                    
+                    {% block content %}
+                        
+                    {% endblock content %}
+                        
+                    <script type='text/javascript' src='{% static "js/mainActions.js" %}'></script>
+                </div>
+                
+            </body>
+            </html>
