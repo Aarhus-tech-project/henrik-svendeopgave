@@ -1,0 +1,19 @@
+{% extends "Main.html" %}
+{% load static %}
+
+{% block content %}
+    <div class='transition-all duration-700' id='blurBackground'>
+        <!-- Modal Background (Blur Effect) -->
+        <div id="taskModalBackdrop" class="hidden fixed inset-0 backdrop-blur-sm transition-all duration-300"></div> 
+    </div>
+    
+    {% block modal %}
+        <div id="modal" class="hidden fixed inset-0 flex items-center justify-center">
+            <div class="relative place-items-center bg-white p-6 rounded-lg shadow-lg" id='modalBox'>
+                <button onclick="closeModal()" class="absolute top-3 right-4 text-xl z-[5] hover:text-red-600" id='modalClose'>✕</button>
+            </div>
+        </div>
+    {% endblock modal %}
+        
+{% endblock content %}
+    
