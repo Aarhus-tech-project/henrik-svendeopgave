@@ -2,6 +2,15 @@
 {% load static %}
 
 {% block content %}
+    {% block dialog %}
+    <div class='hidden absolute w-full flex place-content-center top-[3.5rem] mx-[-2.5rem] z-[1]' id='dialog'>
+        <div class='relative w-96 bg-slate-50 border border-black rounded-md p-5' id='dialogBox'>
+            <p id='dialogText'></p>
+            <div class='flex justify-around mt-5' id='dialogButtons'>
+            </div>
+        </div>
+    </div>
+    {% endblock dialog %}
     <div class='transition-all duration-700' id='blurBackground'>
         <!-- Modal Background (Blur Effect) -->
         <div id="taskModalBackdrop" class="hidden fixed inset-0 backdrop-blur-sm transition-all duration-300"></div> 
@@ -11,6 +20,32 @@
         <div id="modal" class="hidden fixed inset-0 flex items-center justify-center">
             <div class="relative place-items-center bg-white p-6 rounded-lg shadow-lg" id='modalBox'>
                 <button onclick="closeModal()" class="absolute top-3 right-4 text-xl z-[5] hover:text-red-600" id='modalClose'>✕</button>
+
+                {% block user %}
+                    <div class='hidden place-items-center' id='modalUser'>
+                        <h1 class='text-2xl max-w-96 whitespace-nowrap overflow-hidden overflow-ellipsis'>{{user}}</h1>
+                        <p class="max-w-72 text-center text-red-500 hidden" id='userError'></p>
+                        {% if error %}
+                        <p class="text-red-500">{{ error }}</p>
+                        {% endif %}
+                        <form action="{% url 'update_user' %}" method='post' id='userForm' autocomplete="off">
+                            {% csrf_token %}
+                            <div class='flex flex-col mt-5 p-3' id='userFormBox'>
+                                <input class='rounded-md m-2' type="text" name="username" id="userNameUser" placeholder='Username'>
+                                <input class='rounded-md m-2' type="text" name="first_name" id="firstNameUser" placeholder='First name'>
+                                <input class='rounded-md m-2' type="text" name="last_name" id="lastNameUser" placeholder='Last name'>
+                                <input class='rounded-md m-2' type="email" name="email" id="emailUser" placeholder='Email'>
+                                <input class='hidden rounded-md m-2' type="password" name="password" id="passwordUser" placeholder='Password' autocomplete="new-password">
+                                <input class='hidden rounded-md m-2' type="password" name="confirm_password" id="confirmPasswordUser" placeholder='Confirm password' autocomplete="new-password">
+                            </div>
+                            <div class='flex flex-col'>
+                                <button type='button' onclick='showPasswordUpdate()' class='hover:opacity-80 text-md' id='changePassBtn'>Change password</button>
+                                <button type='button' onclick='checkUpdateUser()' class='hover:opacity-80 text-md' id='updateUserBtn'>Update</button>
+                                <button type='button' onclick='dialogOpen("deleteUser")' class='hover:opacity-80 text-sm text-red-500 mt-3' id='deleteUserBtn'>Delete user</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endblock user %}
             </div>
         </div>
     {% endblock modal %}
