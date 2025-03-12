@@ -8,6 +8,14 @@
                 <title>CoinControl</title>
                 {% tailwind_css %}
                 <script type='text/javascript'>
+                    const user = '{{request.user}}';
+                    const userInfo = {
+                        username: '{{ user.username }}',
+                        email: '{{ user.email }}',
+                        first_name: '{{ user.first_name }}',
+                        last_name: '{{ user.last_name }}',
+                    }
+
                     function getToken(name) {
                         var cookieValue = null;
                         if (document.cookie && document.cookie !== '') {
@@ -32,8 +40,10 @@
                             <h1 class='inline-block text-3xl text-gray-400 mx-5'>CoinControl</h1>
                         </div>
                         <div class='flex flex-grow justify-end' id='userActions'>
-                            <button onclick='showOptions()' class='inline-block h-7 text-[2.25rem] text-black hover:text-opacity-70 mt-[-1.1rem] mr-5 z-50' id='addTaskBtn'>+</button>
-                            <h2 class='inline-block justify-end text-lg right-0 mr-5' id='userName'>Username</h2>
+                            <button onclick='toggleMenu()' class='inline-block font-[900] rotate-45 text-black hover:text-opacity-70 z-50' id='menuBtn'>✕</button>
+                            <div class='hidden absolute bg-white w-44 min-h-10 max-h-80 border border-black rounded-md overflow-auto mt-5' id='menuBox'></div>
+                            <h2 class='inline-block justify-end max-w-40 whitespace-nowrap overflow-hidden overflow-ellipsis text-lg right-0 mx-5' id='userName'>Username</h2>
+                            <button onclick='logoutFunc()' class='inline-block justify-end text-md border border-black rounded-md text-black hover:text-opacity-70 px-2 right-0 mr-5' id='logoutBtn'>Logout</button>
                         </div>
                     </nav>
                 {% endblock navbar %}
@@ -47,5 +57,16 @@
                     <script type='text/javascript' src='{% static "js/mainActions.js" %}'></script>
                 </div>
                 
+
+                <script type='text/javascript'>
+                    if (user === 'AnonymousUser') {
+                        document.querySelector('#userName').textContent = 'Username'
+                        document.querySelector('#logoutBtn').classList.add('hidden')
+                        document.querySelector('#userName').classList.remove('cursor-pointer')
+                    } else {
+                        document.querySelector('#logoutBtn').classList.remove('hidden')
+                        document.querySelector('#userName').textContent = `${user}`
+                    }
+                </script>
             </body>
             </html>

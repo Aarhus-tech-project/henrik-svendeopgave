@@ -1,0 +1,46 @@
+{% extends "Main.html" %}
+{% load static %}
+
+
+{% block content %}
+    <div class="flex h-[81vh] items-center justify-center">
+        <div class='w-80 h-fit border border-black rounded-md pt-5 pb-2' id='loginBox'>
+            {% block login %}
+                <div class='place-items-center' id='modalLogin'>
+                    <h1 class='text-2xl'>Login</h1>
+                    <p class="text-red-500 hidden" id='loginError'></p>
+                    {% if error %}
+                    <p class="text-red-500">{{ error }}</p>
+                    {% endif %}
+                    <form action="{% url 'login' %}" method='post' id='loginForm'>
+                        {% csrf_token %}
+                        <div class='flex flex-col mt-5 p-3'>
+                            <input class='rounded-md m-2' type="text" name="username_or_email" id="userNameOrEmailLogin" placeholder='Username or email'>
+                            <input class='rounded-md m-2' type="password" name="password" id="passwordLogin" placeholder='Password'>
+                        </div>
+                        <div class='flex flex-col'>
+                            <button type='button' onclick='loginFunc()' class='hover:opacity-80 text-md' id='loginBtn'>Login</button>
+                            <button type='button' onclick='linkToSignup()' class='opacity-80 hover:opacity-70 text-sm'>Signup</button>
+                        </div>
+                    </form>
+                </div>                
+            {% endblock login %}
+        </div>
+    </div>
+
+    <script type='text/javascript'>
+        document.querySelector('#loginForm').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loginFunc()
+            }
+        })
+
+        function linkToSignup() {
+            if (window.location.href.includes('next')) {
+                window.location.href = window.location.href.replace('login', 'signup');
+            } else {
+                window.location.href = "{% url 'signup' %}";
+            }
+        }
+    </script>
+{% endblock content %}
