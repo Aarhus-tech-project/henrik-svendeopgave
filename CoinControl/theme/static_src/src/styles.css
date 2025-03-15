@@ -51,3 +51,27 @@
 .dialogAnimate {
     animation: fadeIn 0.5s ease-in-out, shake 0.5s ease-in-out;
 }
+
+.eyeOffBox {
+    transition: height 500ms ease-in-out;
+}
+
+.eyeOnBox {
+    transition: height 500ms ease-in-out;
+}
+
+.showing-eye-off .eyeOffBox {
+    height: 1.25rem; /* Grow to original height */
+}
+
+.showing-eye-off .eyeOnBox {
+    height: 0; /* Shrink to zero height */
+}
+
+.showing-eye-on .eyeOffBox {
+    height: 0; /* Shrink to zero height */
+}
+
+.showing-eye-on .eyeOnBox {
+    height: 1.25rem; /* Grow to original height */
+}

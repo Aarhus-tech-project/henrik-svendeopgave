@@ -168,9 +168,9 @@ function loginFunc() {
 let modalOpen = false;
 function openModal(type) {
     modalOpen = true;
+    document.getElementById("blurBackground").classList.remove("duration-300");
     document.querySelector("#modal").classList.remove("hidden");
-    document.querySelector("#taskModalBackdrop").classList.remove("hidden");
-    document.querySelector("#blurBackground").classList.add("blur-sm");
+    document.querySelector("#blurBackground").classList.add("blur-sm", "backdrop-blur-sm", "duration-700");
     
     if (type === 'user') {        
         document.querySelector('#updateUserBtn').setAttribute('onclick', `checkUpdateUser(${JSON.stringify(userInfo)})`)
@@ -185,12 +185,12 @@ function openModal(type) {
 
 // show password fields
 function showPasswordUpdate() {
-    if (document.querySelector('#passwordUser').classList.contains('hidden')) {
-        document.querySelector('#passwordUser').classList.remove('hidden')
-        document.querySelector('#confirmPasswordUser').classList.remove('hidden')
+    if (document.querySelector('#passwordUserBox').classList.contains('hidden')) {
+        document.querySelector('#passwordUserBox').classList.remove('hidden')
+        document.querySelector('#confirmPasswordUserBox').classList.remove('hidden')
     } else {
-        document.querySelector('#passwordUser').classList.add('hidden')
-        document.querySelector('#confirmPasswordUser').classList.add('hidden')
+        document.querySelector('#passwordUserBox').classList.add('hidden')
+        document.querySelector('#confirmPasswordUserBox').classList.add('hidden')
     }
 };
 
@@ -209,9 +209,10 @@ function closeModal() {
         textarea.value = '';
     })
     
+    document.getElementById("blurBackground").classList.remove("duration-700");
+    document.getElementById("blurBackground").classList.add("duration-300");
     document.getElementById("modal").classList.add("hidden");
-    document.getElementById("blurBackground").classList.remove("blur-sm");
-    document.getElementById("taskModalBackdrop").classList.add("hidden");
+    document.getElementById("blurBackground").classList.remove("blur-sm", "backdrop-blur-sm");
     modalOpen = false;
 };
 
@@ -241,8 +242,8 @@ function checkUpdateUser(userInfo) {
 
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-    if (isDifferent || (password != '' && !document.querySelector('#passwordUser').classList.contains('hidden'))) {
-        if (!document.querySelector('#passwordUser').classList.contains('hidden')) {
+    if (isDifferent || (password != '' && !document.querySelector('#passwordUserBox').classList.contains('hidden'))) {
+        if (!document.querySelector('#passwordUserBox').classList.contains('hidden')) {
             if (password != '' && confirmPassword != '') {
                 if (password !== confirmPassword) {
                     userError.textContent = 'Passwords do not match';
@@ -360,3 +361,29 @@ function dialogOpen(type) {
         `;
     }
 }
+
+function linkToFunc(location = '') {
+    location = '/' + location;
+    if (window.location.href.includes('next')) {
+        let nextString = '?next=' + window.location.href.split('next=')[1];
+        // window.location.href = window.location.href.replace(window.location.pathname.split('/')[1], location);
+        window.location.href = location + nextString;
+    } else {
+        window.location.href = location;
+    }
+}
+
+function togglePasswordVisibility(passwordInputId, iconContainerId) {
+    const passwordInput = document.getElementById(passwordInputId); // Adjust ID as needed
+    const iconContainer = document.getElementById(iconContainerId)
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        iconContainer.classList.remove('showing-eye-off');
+        iconContainer.classList.add('showing-eye-on');
+    } else {
+        passwordInput.type = 'password';
+        iconContainer.classList.remove('showing-eye-on');
+        iconContainer.classList.add('showing-eye-off');
+    }
+};

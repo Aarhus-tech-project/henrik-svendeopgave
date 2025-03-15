@@ -3,17 +3,16 @@
 
 {% block content %}
     {% block dialog %}
-    <div class='hidden absolute w-full flex place-content-center top-[3.5rem] mx-[-2.5rem] z-[1]' id='dialog'>
-        <div class='relative w-96 bg-slate-50 border border-black rounded-md p-5' id='dialogBox'>
-            <p id='dialogText'></p>
-            <div class='flex justify-around mt-5' id='dialogButtons'>
+        <div class='hidden absolute w-full flex place-content-center top-[3.5rem] mx-[-2.5rem] z-[1]' id='dialog'>
+            <div class='relative w-96 bg-slate-50 border border-black rounded-md p-5' id='dialogBox'>
+                <p id='dialogText'></p>
+                <div class='flex justify-around mt-5' id='dialogButtons'>
+                </div>
             </div>
         </div>
-    </div>
     {% endblock dialog %}
-    <div class='transition-all duration-700' id='blurBackground'>
-        <!-- Modal Background (Blur Effect) -->
-        <div id="taskModalBackdrop" class="hidden fixed inset-0 backdrop-blur-sm transition-all duration-300"></div> 
+    <div class='transition-all' id='blurBackground'>
+        <br>
     </div>
     
     {% block modal %}
@@ -35,8 +34,55 @@
                                 <input class='rounded-md m-2' type="text" name="first_name" id="firstNameUser" placeholder='First name'>
                                 <input class='rounded-md m-2' type="text" name="last_name" id="lastNameUser" placeholder='Last name'>
                                 <input class='rounded-md m-2' type="email" name="email" id="emailUser" placeholder='Email'>
-                                <input class='hidden rounded-md m-2' type="password" name="password" id="passwordUser" placeholder='Password' autocomplete="new-password">
-                                <input class='hidden rounded-md m-2' type="password" name="confirm_password" id="confirmPasswordUser" placeholder='Confirm password' autocomplete="new-password">
+                                    
+                                {% block password_toggle_visibility %}
+                                    <div class='hidden relative' id='passwordUserBox'>
+                                        <input class='rounded-md m-2' type="password" name="password" id="passwordUser" placeholder='Password' autocomplete="new-password">
+                                        <button type="button" onclick='togglePasswordVisibility("passwordUser", "iconContainer1")' class="togglePass absolute inset-y-0 right-0 flex items-center pr-3" aria-label="Toggle password visibility">
+                                            <div class="relative h-5 w-5 showing-eye-off" id='iconContainer1'>
+                                                <!-- Eye-Off Icon (visible by default) -->
+                                                <div class="eyeOffBox absolute top-0 left-0 w-full h-full overflow-hidden">
+                                                    <svg class="eyeOff absolute top-0 left-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" transform="translate(24,0) scale(-1,1)" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7A9.97 9.97 0 014.02 8.971m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88 6.59 6.59m7.532 7.532 3.29 3.29M6.59 6.59A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411" />
+                                                        <path class="diagonal-line" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 3L3 21" />
+                                                    </svg>
+                                                </div>
+                                                <!-- Eye Icon (hidden by default) -->
+                                                <div class="eyeOnBox absolute bottom-0 left-0 w-full h-full overflow-hidden">
+                                                    <svg class="eyeOn absolute bottom-0 left-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                {% endblock password_toggle_visibility %}
+                                                                    
+                                {% block confirm_password_toggle_visibility %}
+                                    <div class='hidden relative' id='confirmPasswordUserBox'>
+                                        <input class='rounded-md m-2' type="password" name="confirm_password" id="confirmPasswordUser" placeholder='Confirm password' autocomplete="new-password">
+                                        <button type="button" onclick='togglePasswordVisibility("confirmPasswordUser", "iconContainer2")' class="togglePass absolute inset-y-0 right-0 flex items-center pr-3" aria-label="Toggle password visibility">
+                                            <div class="relative h-5 w-5 showing-eye-off" id='iconContainer2'>
+                                                <!-- Eye-Off Icon (visible by default) -->
+                                                <div class="eyeOffBox absolute top-0 left-0 w-full h-full overflow-hidden">
+                                                    <svg class="eyeOff absolute top-0 left-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" transform="translate(24,0) scale(-1,1)" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7A9.97 9.97 0 014.02 8.971m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88 6.59 6.59m7.532 7.532 3.29 3.29M6.59 6.59A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411" />
+                                                        <path class="diagonal-line" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 3L3 21" />
+                                                    </svg>
+                                                </div>
+                                                <!-- Eye Icon (hidden by default) -->
+                                                <div class="eyeOnBox absolute bottom-0 left-0 w-full h-full overflow-hidden">
+                                                    <svg class="eyeOn absolute bottom-0 left-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                {% endblock confirm_password_toggle_visibility %}
+                                
                             </div>
                             <div class='flex flex-col'>
                                 <button type='button' onclick='showPasswordUpdate()' class='hover:opacity-80 text-md' id='changePassBtn'>Change password</button>
@@ -46,6 +92,8 @@
                         </form>
                     </div>
                 {% endblock user %}
+
+                
             </div>
         </div>
     {% endblock modal %}
