@@ -16,11 +16,35 @@
                         {% csrf_token %}
                         <div class='flex flex-col mt-5 p-3'>
                             <input class='rounded-md m-2' type="text" name="username_or_email" id="userNameOrEmailLogin" placeholder='Username or email'>
-                            <input class='rounded-md m-2' type="password" name="password" id="passwordLogin" placeholder='Password'>
+                            
+                            {% block password_toggle_visibility %}
+                                <div class='relative'>
+                                    <input class='rounded-md m-2' type="password" name="password" id="passwordLogin" placeholder='Password'>
+                                    <button type="button" onclick='togglePasswordVisibility("passwordLogin", "iconContainer1")' class="togglePass absolute inset-y-0 right-0 flex items-center pr-3" aria-label="Toggle password visibility">
+                                        <div class="relative h-5 w-5 showing-eye-off" id='iconContainer1'>
+                                            <!-- Eye-Off Icon (visible by default) -->
+                                            <div class="eyeOffBox absolute top-0 left-0 w-full h-full overflow-hidden">
+                                                <svg class="eyeOff absolute top-0 left-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" transform="translate(24,0) scale(-1,1)" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7A9.97 9.97 0 014.02 8.971m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88 6.59 6.59m7.532 7.532 3.29 3.29M6.59 6.59A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411" />
+                                                    <path class="diagonal-line" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 3L3 21" />
+                                                </svg>
+                                            </div>
+                                            <!-- Eye Icon (hidden by default) -->
+                                            <div class="eyeOnBox absolute bottom-0 left-0 w-full h-full overflow-hidden">
+                                                <svg class="eyeOn absolute bottom-0 left-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            {% endblock password_toggle_visibility %}
+                                
                         </div>
                         <div class='flex flex-col'>
                             <button type='button' onclick='loginFunc()' class='hover:opacity-80 text-md' id='loginBtn'>Login</button>
-                            <button type='button' onclick='linkToSignup()' class='opacity-80 hover:opacity-70 text-sm'>Signup</button>
+                            <button type='button' onclick='linkToFunc("signup")' class='opacity-80 hover:opacity-70 text-sm'>Signup</button>
                         </div>
                     </form>
                 </div>                
@@ -34,13 +58,5 @@
                 loginFunc()
             }
         })
-
-        function linkToSignup() {
-            if (window.location.href.includes('next')) {
-                window.location.href = window.location.href.replace('login', 'signup');
-            } else {
-                window.location.href = "{% url 'signup' %}";
-            }
-        }
     </script>
 {% endblock content %}
