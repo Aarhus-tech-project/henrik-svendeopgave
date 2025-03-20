@@ -2,6 +2,40 @@
 {% load static %}
 
 {% block content %}
+    <script type='text/javascript'>
+        let transactions = []
+
+        
+        {% for item in transactions %}
+            if ('{{item.value}}'.includes('-')) {
+                transactions.push({
+                    id: '{{ item.id }}',
+                    date: '{{ item.date }}',
+                    negative: true,
+                    value: '{{ item.value }}',
+                    currency: '{{ item.value_currency }}',
+                    recipient: '{{ item.recipient }}',
+                    account_name: '{{ item.account.name }}',
+                    account_alias: '{{ item.account.alias }}',
+                    notes: '{{ item.notes }}',
+                })            
+            } else {
+                transactions.push({
+                    id: '{{ item.id }}',
+                    date: '{{ item.date }}',
+                    negative: false,
+                    value: '{{ item.value }}',
+                    currency: '{{ item.value_currency }}',
+                    recipient: '{{ item.recipient }}',
+                    account_name: '{{ item.account.name }}',
+                    account_alias: '{{ item.account.alias }}',
+                    notes: '{{ item.notes }}',
+                })            
+            }
+        {% endfor %}
+            
+    </script>
+    
     {% block dialog %}
         <div class='hidden absolute w-full flex place-content-center top-[3.5rem] mx-[-2.5rem] z-[1]' id='dialog'>
             <div class='relative w-96 bg-slate-50 border border-black rounded-md p-5' id='dialogBox'>
@@ -11,8 +45,39 @@
             </div>
         </div>
     {% endblock dialog %}
+
     <div class='transition-all' id='blurBackground'>
-        <br>
+        <div class='flex items-center justify-center w-screen'>
+            <div class='inline-block left-0 w-1/5 h-[92dvh] bg-blue-600' id='sidebar'>
+            </div>
+            <div class='flex flex-col justify-center w-4/5 h-[92dvh] p-10'>
+                <div class='flex w-full h-fit items-center justify-around border-b border-black text-center px-4' id='titlesBox'>
+                    <h1 class='max-w-1/4'>Date</h1>
+                    <h1 class='max-w-1/4'>Transaction value</h1>
+                    <h1 class='max-w-1/4'>Total</h1>
+                    <h1 class='max-w-1/4'>Recipient</h1>
+                </div>
+                <div class='flex flex-col w-full h-full overflow-auto text-center px-4' id='transactionsBox'>
+                    
+                    {% for item in transactions %}
+                        <div class='transaction flex w-full min-h-10 items-center justify-around cursor-pointer border border-black rounded-md my-3 hover:waa' id='transaction{{item.id}}'>
+                            <h1 class='max-w-1/4' id='date{{item.id}}'>{{item.date}}</h1>
+                            <h1 class='max-w-1/4' id='value{{item.id}}'>{{item.value}}</h1>
+                            <h1 class='hidden' id='currency{{item.id}}'>{{item.value_currency}}</h1>
+                            <h1 class='max-w-1/4' id='total{{item.id}}'>{{item.account.get_total}}</h1>  
+
+                            {% if item.recipient %}
+                                <h1 class='max-w-1/4' id='recipient{{item.id}}'>{{item.recipient}}</h1>
+                            {% else %}
+                                <h1 class='max-w-1/4' id='recipient{{item.id}}'>No recipient</h1>
+                            {% endif %}
+                                
+                        </div>    
+                    {% endfor %}
+                        
+                </div>
+            </div>
+        </div>
     </div>
     
     {% block modal %}
@@ -21,12 +86,14 @@
                 <button onclick="closeModal()" class="absolute top-3 right-4 text-xl z-[5] hover:text-red-600" id='modalClose'>✕</button>
 
                 {% block user %}
-                    <div class='hidden place-items-center' id='modalUser'>
+                    <div class='hidden place-items-center mx-5' id='modalUser'>
                         <h1 class='text-2xl max-w-96 whitespace-nowrap overflow-hidden overflow-ellipsis'>{{user}}</h1>
                         <p class="max-w-72 text-center text-red-500 hidden" id='userError'></p>
+                        
                         {% if error %}
-                        <p class="text-red-500">{{ error }}</p>
+                            <p class="text-red-500">{{ error }}</p>
                         {% endif %}
+                        
                         <form action="{% url 'update_user' %}" method='post' id='userForm' autocomplete="off">
                             {% csrf_token %}
                             <div class='flex flex-col mt-5 p-3' id='userFormBox'>
@@ -92,8 +159,66 @@
                         </form>
                     </div>
                 {% endblock user %}
-
+                    
+                {% block transaction %}
+                    <div class='hidden place-items-center mx-5' id='modalTransaction'>
+                        <h1 class='text-2xl max-w-96 whitespace-nowrap overflow-hidden overflow-ellipsis'>Add transaction</h1>
+                        <p class="max-w-72 text-center text-red-500 hidden" id='transactionError'></p>
+                        
+                        {% if error %}
+                            <p class="text-red-500">{{ error }}</p>
+                        {% endif %}
+                        
+                        <form action="{% url 'add_transaction' %}" method='post' id='transactionForm'>
+                            {% csrf_token %}
+                            <div class='flex flex-col mt-5 p-3' id='transactionFormBox'>
+                                <input class='rounded-md m-2' type="date" name="date" id="dateTransaction" placeholder='Date (default today)'>
+                                <input class='rounded-md m-2' type="number" name="value" id="valueTransaction" placeholder='Transaction value'>
+                                <input class='rounded-md m-2' type="text" name="currency" id="currencyTransaction" placeholder='Currency (USD, DKK...)'>
+                                <input class='rounded-md m-2' type="text" name="recipient" id="recipientTransaction" placeholder='Recipient'>
+                                <input class='rounded-md m-2' type="text" name="account" id="accountTransaction" placeholder='Account'>
+                                <textarea class='max-h-20 rounded-md m-2' name="notes" id="notesTransaction" placeholder='notes'></textarea>
+                            </div>
+                            <div class='flex flex-col'>
+                                <button type='button' onclick='addTransaction()' class='hover:opacity-80 text-md' id='addTransactionBtn'>Add transaction</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endblock transaction %}
+                        
+                {% block updateTransaction %}
+                    <div class='hidden place-items-center mx-5' id='modalUpdateTransaction'>
+                        <h1 class='text-2xl max-w-96 whitespace-nowrap overflow-hidden overflow-ellipsis' id='updateTransactionTitle'>Update transaction</h1>
+                        <p class="max-w-72 text-center text-red-500 hidden" id='updateTransactionError'></p>
+                        
+                        {% if error %}
+                            <p class="text-red-500">{{ error }}</p>
+                        {% endif %}
+                        
+                        <form action="{% url 'update_transaction' %}" method='post' id='updateTransactionForm' autocomplete="off">
+                            {% csrf_token %}
+                            <div class='flex flex-col mt-5 p-3' id='updateTransactionFormBox'>
+                                <input class='rounded-md m-2' type="date" name="date" id="dateUpdateTransaction" placeholder='Date (default today)'>
+                                <input class='rounded-md m-2' type="number" name="value" id="valueUpdateTransaction" placeholder='Transaction value'>
+                                <input class='rounded-md m-2' type="text" name="currency" id="currencyUpdateTransaction" placeholder='Currency (USD, DKK...)'>
+                                <input class='rounded-md m-2' type="text" name="recipient" id="recipientUpdateTransaction" placeholder='Recipient'>
+                                <input class='rounded-md m-2' type="text" name="account" id="accountUpdateTransaction" placeholder='Account'>
+                                <textarea class='max-h-20 rounded-md m-2' name="notes" id="notesUpdateTransaction" placeholder='notes'></textarea>
+                            </div>
+                            <div class='flex flex-col'>
+                                <button type='button' onclick='updateTransaction()' class='hover:opacity-80 text-md' id='updateTransactionBtn'>Update transaction</button>
+                                <button type='button' onclick='dialogOpen("deleteTransaction")' class='hover:opacity-80 text-sm text-red-500 mt-3' id='deleteTransactionBtn'>Delete transaction</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endblock updateTransaction %}
+                    
+                {% block account %}
+                {% endblock account %}
                 
+                {% block updateAccount %}
+                {% endblock updateAccount %}
+                                        
             </div>
         </div>
     {% endblock modal %}

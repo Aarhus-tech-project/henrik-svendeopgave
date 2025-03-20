@@ -1,16 +1,77 @@
 // If on homepage allow changing of user info
 let modalBtn;
 document.addEventListener('DOMContentLoaded', () => {
+    
     if (window.location.pathname == '/') {
-        document.querySelector('#userName').classList.add('cursor-pointer');
-        document.querySelector('#userName').addEventListener('click', () => {
-            modalBtn = document.querySelector('#userName')
-            openModal('user')
-        })
+        // Transaction click
+        document.querySelector('#menuBox').classList.add('menuBoxOff')
+        const transactionElms = document.querySelectorAll('.transaction');
+        if (transactionElms.length > 0) {
+            transactionElms.forEach(transaction => {
+                let transactionId = transaction.getAttribute('id').split('transaction')[1];
+                transaction.addEventListener('click', () => {
+                    modalBtn = transaction.getAttribute('id');
+                    document.querySelector('#deleteTransactionBtn').setAttribute('onclick', `dialogOpen("deleteTransaction", ${transactionId})`)
+                    openModal('updateTransaction', transactionId)
+                })
+            });
+        };
+        
+        // Username click
+        const username = document.querySelector('#userName');
+        username.classList.add('cursor-pointer', 'hover:opacity-70');
+        username.setAttribute('onClick', "openModal('user')")
+        username.addEventListener('click', () => {
+            modalBtn = username.getAttribute('id');
+        });
+
+        if (transactions.length > 0) {
+            transactions.forEach(transaction => {
+                let transactionValue = parseFloat(transaction['value'].replace(',', '').replace(/^[^\d]+/, ''));
+                let transactionDate = transaction['date']
+                let dateObject = new Date(transactionDate); // Convert to Date object
+                let currency = transaction['value'].replace(/[0-9.,-]+/g, '').trim();
+                let value = document.querySelector(`#value${transaction['id']}`)
+
+                if (transaction['negative'] == true) {
+                    value.textContent = `${currency} -${transactionValue.toFixed(2)}`
+                    value.classList.add('text-red-800')
+                }else {
+                    value.textContent = `${currency} ${transactionValue.toFixed(2)}`
+                    value.classList.remove('text-red-800')
+                }
+                
+                // Format the date to YYYY-MM-DD
+                let year = dateObject.getFullYear();
+                let month = ('0' + (dateObject.getMonth() + 1)).slice(-2);
+                let day = ('0' + dateObject.getDate()).slice(-2);
+                let formattedDate = `${year}-${month}-${day}`;
+
+                transaction['value'] = transactionValue;
+                transaction['date'] = formattedDate;
+            })            
+        }
     } else {
-        document.querySelector('#userName').classList.remove('cursor-pointer');
+        document.querySelector('#userName').classList.remove('cursor-pointer', 'hover:opacity-70');
     }
 });
+
+
+// Get token
+function getToken(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            };
+        };
+    };
+    return cookieValue;
+};
 
 // logout function
 function logoutFunc() {
@@ -44,27 +105,30 @@ function toggleMenu() {
     const button = document.querySelector('#menuBtn');
     const btnRect = button.getBoundingClientRect();
     const menuBox = document.querySelector('#menuBox');
+    menuBox.classList.add('menuBoxOff')
     
     if (window.location.pathname == '/') {
         button.classList.remove('rotate-45', 'font-[900]');
         
         if (button.classList.contains('menuBtnOn')) {
             button.classList.remove('menuBtnOn');
+            menuBox.classList.remove('menuBoxOn')
             button.classList.add('menuBtnOff');
+            menuBox.classList.add('menuBoxOff')
+            menuOpen = false;
         } else {
             button.classList.remove('menuBtnOff');
+            menuBox.classList.remove('menuBoxOff')
             button.classList.add('menuBtnOn');
+            menuBox.classList.add('menuBoxOn')
+            menuOpen = true;
         }
-    
+        
         if (menuBox.classList.contains('hidden')) {
             menuBox.classList.remove('hidden')
-            menuBox.classList.add('w-44', 'h-10', 'max-h-80')
+            menuBox.classList.add('w-44')
             menuBox.style.top = `${btnRect.bottom}px`;
             menuBox.style.left = `${btnRect.right - menuBox.getBoundingClientRect().width}px`;
-            menuOpen = true;
-        } else {
-            menuBox.classList.add('hidden')
-            menuOpen = false;
         }
     }
 }
@@ -166,20 +230,67 @@ function loginFunc() {
 
 // Open modal
 let modalOpen = false;
-function openModal(type) {
+function openModal(type, transactionId = null) {
     modalOpen = true;
     document.getElementById("blurBackground").classList.remove("duration-300");
     document.querySelector("#modal").classList.remove("hidden");
     document.querySelector("#blurBackground").classList.add("blur-sm", "backdrop-blur-sm", "duration-700");
     
-    if (type === 'user') {        
-        document.querySelector('#updateUserBtn').setAttribute('onclick', `checkUpdateUser(${JSON.stringify(userInfo)})`)
-        document.querySelector('#modalUser').classList.remove('hidden')
+    if (type === 'user') {
+        document.querySelector('#updateUserBtn').setAttribute('onclick', `checkUpdateUser(${JSON.stringify(userInfo)})`);
+        document.querySelector('#modalUser').classList.remove('hidden');
+        document.querySelector('#modalTransaction').classList.add('hidden');
+        document.querySelector('#modalUpdateTransaction').classList.add('hidden');
         
-        document.querySelector('#userNameUser').value = userInfo.username
-        document.querySelector('#emailUser').value = userInfo.email
-        document.querySelector('#firstNameUser').value = userInfo.first_name
-        document.querySelector('#lastNameUser').value = userInfo.last_name
+        document.querySelector('#userNameUser').value = userInfo.username;
+        document.querySelector('#emailUser').value = userInfo.email;
+        document.querySelector('#firstNameUser').value = userInfo.first_name;
+        document.querySelector('#lastNameUser').value = userInfo.last_name;
+    } else if (type === 'transaction') {
+        document.querySelector('#modalTransaction').classList.remove('hidden');
+        document.querySelector('#modalUser').classList.add('hidden');
+        document.querySelector('#modalUpdateTransaction').classList.add('hidden');
+
+        let dateObject = new Date();
+        let year = dateObject.getFullYear();
+        let month = ('0' + (dateObject.getMonth() + 1)).slice(-2);
+        let day = ('0' + dateObject.getDate()).slice(-2);
+        let formattedDate = `${year}-${month}-${day}`;
+
+        document.querySelector('#dateTransaction').value = formattedDate
+        document.querySelector('#currencyTransaction').value = 'DKK (default)'
+
+
+    } else if (type === 'updateTransaction') {
+        document.querySelector('#modalUpdateTransaction').classList.remove('hidden');
+        document.querySelector('#modalUser').classList.add('hidden');
+        document.querySelector('#modalTransaction').classList.add('hidden');
+        
+        transactions.forEach(transaction => {
+            if (transaction['id'] == transactionId) {
+                console.table(transaction)
+                document.querySelector('#updateTransactionTitle').textContent = 'Update transaction ' + transactionId;
+
+                document.querySelector('#dateUpdateTransaction').value = transaction['date']
+                if (transaction['negative']) {
+                    document.querySelector('#valueUpdateTransaction').value = `-${transaction['value'].toFixed(2)}`
+                } else {
+                    document.querySelector('#valueUpdateTransaction').value = transaction['value'].toFixed(2)
+                }
+                document.querySelector('#currencyUpdateTransaction').value = transaction['currency']
+                if (transaction['recipient']) {
+                    document.querySelector('#recipientUpdateTransaction').value = transaction['recipient']
+                }
+                if (transaction['account_alias']) {
+                    document.querySelector('#accountUpdateTransaction').value = transaction['account_alias']
+                } else {
+                    document.querySelector('#accountUpdateTransaction').value = transaction['account_name']
+                }
+                document.querySelector('#notesUpdateTransaction').value = transaction['notes']
+                document.querySelector('#updateTransactionBtn').setAttribute('onclick', `updateTransaction(${transactionId})`)
+
+            }
+        })
     }
 };
 
@@ -271,10 +382,82 @@ function checkUpdateUser(userInfo) {
     }
 };
 
+// add transaction function
+function addTransaction() {
+    let date = document.querySelector('#dateTransaction').value
+    let value = document.querySelector('#valueTransaction').value
+    let currency = document.querySelector('#currencyTransaction').value
+    let recipient = document.querySelector('#recipientTransaction').value
+    let account = document.querySelector('#accountTransaction').value
+    let notes = document.querySelector('#notesTransaction').value
+    let transactionError = document.querySelector('#transactionError')
+    let csrftoken = getToken('csrftoken');
+    let url = '/add_transaction'
+
+    if (value == null || account == null) {
+        transactionError.textContent = 'The value field and the account field has to be filled out';
+        transactionError.classList.remove('hidden');
+    } else {
+        transactionError.textContent = '';
+        transactionError.classList.add('hidden');
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({date: date, value: value, currency: currency, recipient: recipient, account: account, notes: notes})
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                console.error('Add transaction failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+}
+
+// update transaction function
+function updateTransaction(id) {
+    let date = document.querySelector('#dateUpdateTransaction').value
+    let value = document.querySelector('#valueUpdateTransaction').value
+    let currency = document.querySelector('#currencyUpdateTransaction').value
+    let recipient = document.querySelector('#recipientUpdateTransaction').value
+    let account = document.querySelector('#accountUpdateTransaction').value
+    let notes = document.querySelector('#notesUpdateTransaction').value
+    let updateTransactionError = document.querySelector('#updateTransactionError')
+    let csrftoken = getToken('csrftoken');
+    let url = '/update_transaction'
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({id: id, date: date, value: value, currency: currency, recipient: recipient, account: account, notes: notes})
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            console.error('Add transaction failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 // delete user function
 function deleteUserFunc() {
     let csrftoken = getToken('csrftoken');
-    let url = '/delete_account';
+    let url = '/delete_user';
 
     dialogClose();
 
@@ -289,6 +472,60 @@ function deleteUserFunc() {
         if (response.ok) {
             window.location.reload();
         } else {
+            console.error('Delete user failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+};
+
+// delete transaction function
+function deleteTransactionFunc(id) {
+    let csrftoken = getToken('csrftoken');
+    let url = '/delete_transaction';
+
+    dialogClose();
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({id: id})
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            console.error('Delete transaction failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+};
+
+// delete account function
+function deleteAccountFunc(id) {
+    let csrftoken = getToken('csrftoken');
+    let url = '/delete_account';
+
+    dialogClose();
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({id: id})
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        } else {
             console.error('Delete account failed');
         }
     })
@@ -297,9 +534,11 @@ function deleteUserFunc() {
     });
 };
 
+// Esc
 document.addEventListener('keydown', (e) => {
-    const button = document.querySelector('#menuBtn');
-    const menuBox = document.querySelector('#menuBox');
+    let button = document.querySelector('#menuBtn');
+    let menuBox = document.querySelector('#menuBox');
+    let dialogBox = document.querySelector('#dialogBox');
     if (e.key == 'Escape') {
         if (dialogIsOpen === false) {
             if (menuOpen === true) {
@@ -317,15 +556,18 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// click outside
 document.addEventListener('click', (e) => {
-    const menuBtn = document.querySelector('#menuBtn');
-    const menuBox = document.querySelector('#menuBox');
-    const modalBox = document.querySelector('#modalBox');
+    let menuBtn = document.querySelector('#menuBtn');
+    let modalBox = document.querySelector('#modalBox');
+    let dialogBox = document.querySelector('#dialogBox');
+    let btnModal = document.getElementById(modalBtn)
+
     // close menu if clicked outside
     if (dialogIsOpen === false) {
-        if (!menuBox.contains(e.target) && !menuBtn.contains(e.target) && menuOpen === true) {
+        if (!menuBtn.contains(e.target) && menuOpen === true) {
             toggleMenu()
-        } else if (!modalBox.contains(e.target) && !modalBtn.contains(e.target) && modalOpen === true) {
+        } else if (!modalBox.contains(e.target) && !btnModal.contains(e.target) && modalOpen === true) {
             closeModal()
         }
     } else {
@@ -347,17 +589,33 @@ function dialogClose () {
 }
 
 // open the dialog box
-function dialogOpen(type) {
+function dialogOpen(type, id=null) {
     dialogIsOpen = true;
     const dialog = document.querySelector('#dialog')
     const dialogBox = document.querySelector('#dialogBox')
     if (type === 'deleteUser') {
         dialog.classList.remove('hidden');
         dialogBox.classList.add('dialogAnimate');
+        document.querySelector('#dialogText').textContent = 'Are you sure you want to delete your user?';
+        document.querySelector('#dialogButtons').innerHTML = `
+        <button onclick='dialogClose()' class='bg-blue-500 text-white rounded-md p-2 hover:bg-opacity-80' id='dialogCancel'>Cancel</button>
+        <button onclick='deleteUserFunc()' class='bg-red-500 text-white rounded-md p-2 hover:bg-opacity-80' id='dialogConfirm'>Delete user</button>
+        `;
+    } else if (type === 'deleteTransaction') {
+        dialog.classList.remove('hidden');
+        dialogBox.classList.add('dialogAnimate');
+        document.querySelector('#dialogText').textContent = 'Are you sure you want to delete your transaction?';
+        document.querySelector('#dialogButtons').innerHTML = `
+        <button onclick='dialogClose()' class='bg-blue-500 text-white rounded-md p-2 hover:bg-opacity-80' id='dialogCancel'>Cancel</button>
+        <button onclick=deleteTransactionFunc(${id}) class='bg-red-500 text-white rounded-md p-2 hover:bg-opacity-80' id='dialogConfirm'>Delete transaction</button>
+        `;
+    } else if (type === 'deleteAccount') {
+        dialog.classList.remove('hidden');
+        dialogBox.classList.add('dialogAnimate');
         document.querySelector('#dialogText').textContent = 'Are you sure you want to delete your account?';
         document.querySelector('#dialogButtons').innerHTML = `
         <button onclick='dialogClose()' class='bg-blue-500 text-white rounded-md p-2 hover:bg-opacity-80' id='dialogCancel'>Cancel</button>
-        <button onclick='deleteUserFunc()' class='bg-red-500 text-white rounded-md p-2 hover:bg-opacity-80' id='dialogConfirm'>Delete account</button>
+        <button onclick=deleteAccountFunc(${id}) class='bg-red-500 text-white rounded-md p-2 hover:bg-opacity-80' id='dialogConfirm'>Delete account</button>
         `;
     }
 }
