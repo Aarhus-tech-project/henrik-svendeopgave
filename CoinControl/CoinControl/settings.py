@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     'django_browser_reload',
+    'encrypted_model_fields',
+    'djmoney',
+    'djmoney.contrib.exchange',
     'budget.apps.BudgetConfig',
 ]
 
@@ -99,6 +102,9 @@ DATABASES = {
         'PASSWORD': tmpPostgres.password,
         'HOST': tmpPostgres.hostname,
         'PORT': 5432,
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
@@ -149,3 +155,9 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/login'
+
+FIELD_ENCRYPTION_KEY = os.environ.get('FIELD_ENCRYPTION_KEY', '')
+
+OPEN_EXCHANGE_RATES_APP_ID = os.environ.get('OPEN_EXCHANGE_RATES_APP_ID', '')
+
+DEFAULT_CURRENCY = 'DKK'

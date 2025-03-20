@@ -15,41 +15,30 @@
                         first_name: '{{ user.first_name }}',
                         last_name: '{{ user.last_name }}',
                     }
-
-                    function getToken(name) {
-                        var cookieValue = null;
-                        if (document.cookie && document.cookie !== '') {
-                            var cookies = document.cookie.split(';');
-                            for (let i = 0; i < cookies.length; i++) {
-                                var cookie = cookies[i].trim();
-                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                                    break;
-                                };
-                            };
-                        };
-                        return cookieValue;
-                    };
                 </script>
             </head>
             <body>
 
                 {% block navbar %}
-                    <nav class='flex-nowrap relative flex w-full items-center justify-between py-2 border-b border-black'>
+                    <nav class='flex-nowrap relative flex h-[8dvh] w-full items-center justify-between py-2 border-b border-black'>
                         <div class='flex w-full flex-wrap items-center px-3'>
                             <h1 class='inline-block text-3xl text-gray-400 mx-5'>CoinControl</h1>
                         </div>
                         <div class='flex flex-grow justify-end' id='userActions'>
                             <button onclick='toggleMenu()' class='inline-block font-[900] rotate-45 text-black hover:text-opacity-70 z-50' id='menuBtn'>✕</button>
-                            <div class='hidden absolute bg-white w-44 min-h-10 max-h-80 border border-black rounded-md overflow-auto mt-5' id='menuBox'></div>
+                            <div class='menuBox hidden absolute bg-white w-44 border border-black rounded-md overflow-auto mt-5 z-[5]' id='menuBox'>
+                                <button onclick='openModal("transaction")' class='w-full text-center py-1 hover:opacity-70' id='addTransactionBtn'>Add transaction</button>
+                                <button onclick='openModal("account")' class='w-full text-center py-1 hover:opacity-70' id='addAccountBtn'>Add account</button>
+                                <button onclick='openModal("updateAccount")' class='w-full text-center py-1 hover:opacity-70' id='updateAccountBtn'>Update account</button>
+                            </div>
                             <h2 class='inline-block justify-end max-w-40 whitespace-nowrap overflow-hidden overflow-ellipsis text-lg right-0 mx-5' id='userName'>Username</h2>
                             <button onclick='logoutFunc()' class='inline-block justify-end text-md border border-black rounded-md text-black hover:text-opacity-70 px-2 right-0 mr-5' id='logoutBtn'>Logout</button>
                         </div>
                     </nav>
                 {% endblock navbar %}
                 
-                <div class='container p-10'>
-                    
+                <div class='container'>
+
                     {% block content %}
                         
                     {% endblock content %}
@@ -62,7 +51,7 @@
                     if (user === 'AnonymousUser') {
                         document.querySelector('#userName').textContent = 'Username'
                         document.querySelector('#logoutBtn').classList.add('hidden')
-                        document.querySelector('#userName').classList.remove('cursor-pointer')
+                        document.querySelector('#userName').classList.remove('cursor-pointer', 'hover:opacity-70')
                     } else {
                         document.querySelector('#logoutBtn').classList.remove('hidden')
                         document.querySelector('#userName').textContent = `${user}`
