@@ -230,7 +230,7 @@ function loginFunc() {
 
 // Open modal
 let modalOpen = false;
-function openModal(type, transactionId = null) {
+function openModal(type, id = null) {
     modalOpen = true;
     document.getElementById("blurBackground").classList.remove("duration-300");
     document.querySelector("#modal").classList.remove("hidden");
@@ -241,7 +241,10 @@ function openModal(type, transactionId = null) {
         document.querySelector('#modalUser').classList.remove('hidden');
         document.querySelector('#modalTransaction').classList.add('hidden');
         document.querySelector('#modalUpdateTransaction').classList.add('hidden');
-        
+        document.querySelector('#modalAddAccount').classList.add('hidden');
+        document.querySelector('#modalAccountList').classList.add('hidden');
+        document.querySelector('#modalUpdateAccount').classList.add('hidden');
+
         document.querySelector('#userNameUser').value = userInfo.username;
         document.querySelector('#emailUser').value = userInfo.email;
         document.querySelector('#firstNameUser').value = userInfo.first_name;
@@ -250,6 +253,9 @@ function openModal(type, transactionId = null) {
         document.querySelector('#modalTransaction').classList.remove('hidden');
         document.querySelector('#modalUser').classList.add('hidden');
         document.querySelector('#modalUpdateTransaction').classList.add('hidden');
+        document.querySelector('#modalAddAccount').classList.add('hidden');
+        document.querySelector('#modalAccountList').classList.add('hidden');
+        document.querySelector('#modalUpdateAccount').classList.add('hidden');
 
         let dateObject = new Date();
         let year = dateObject.getFullYear();
@@ -265,11 +271,14 @@ function openModal(type, transactionId = null) {
         document.querySelector('#modalUpdateTransaction').classList.remove('hidden');
         document.querySelector('#modalUser').classList.add('hidden');
         document.querySelector('#modalTransaction').classList.add('hidden');
-        
+        document.querySelector('#modalAddAccount').classList.add('hidden');
+        document.querySelector('#modalAccountList').classList.add('hidden');
+        document.querySelector('#modalUpdateAccount').classList.add('hidden');
+
         transactions.forEach(transaction => {
-            if (transaction['id'] == transactionId) {
+            if (transaction['id'] == id) {
                 console.table(transaction)
-                document.querySelector('#updateTransactionTitle').textContent = 'Update transaction ' + transactionId;
+                document.querySelector('#updateTransactionTitle').textContent = 'Update transaction ' + id;
 
                 document.querySelector('#dateUpdateTransaction').value = transaction['date']
                 if (transaction['negative']) {
@@ -287,10 +296,34 @@ function openModal(type, transactionId = null) {
                     document.querySelector('#accountUpdateTransaction').value = transaction['account_name']
                 }
                 document.querySelector('#notesUpdateTransaction').value = transaction['notes']
-                document.querySelector('#updateTransactionBtn').setAttribute('onclick', `updateTransaction(${transactionId})`)
+                document.querySelector('#updateTransactionBtn').setAttribute('onclick', `updateTransaction(${id})`)
 
             }
         })
+    } else if (type === 'addAccount') {
+        document.querySelector('#modalAddAccount').classList.remove('hidden');
+        document.querySelector('#modalTransaction').classList.add('hidden');
+        document.querySelector('#modalUser').classList.add('hidden');
+        document.querySelector('#modalUpdateTransaction').classList.add('hidden');
+        document.querySelector('#modalAccountList').classList.add('hidden');
+        document.querySelector('#modalUpdateAccount').classList.add('hidden');
+    } else if (type === 'accountList') {
+        document.querySelector('#modalAccountList').classList.remove('hidden');
+        document.querySelector('#modalTransaction').classList.add('hidden');
+        document.querySelector('#modalUser').classList.add('hidden');
+        document.querySelector('#modalUpdateTransaction').classList.add('hidden');
+        document.querySelector('#modalAddAccount').classList.add('hidden');
+        document.querySelector('#modalUpdateAccount').classList.add('hidden');
+    } else if (type === 'updateAccount') {
+        document.querySelector('#modalUpdateAccount').classList.remove('hidden');
+        document.querySelector('#modalTransaction').classList.add('hidden');
+        document.querySelector('#modalUser').classList.add('hidden');
+        document.querySelector('#modalUpdateTransaction').classList.add('hidden');
+        document.querySelector('#modalAddAccount').classList.add('hidden');
+        document.querySelector('#modalAccountList').classList.add('hidden');
+        
+        document.querySelector('#BtnUpdateAccount').setAttribute('onclick', `updateAccount(${id})`);
+        document.querySelector('#deleteAccountBtn').setAttribute('onclick', `dialogOpen("deleteAccount", ${id})`);
     }
 };
 
@@ -388,13 +421,13 @@ function addTransaction() {
     let value = document.querySelector('#valueTransaction').value
     let currency = document.querySelector('#currencyTransaction').value
     let recipient = document.querySelector('#recipientTransaction').value
-    let account = document.querySelector('#accountTransaction').value
+    let id = document.querySelector('#idTransaction').value
     let notes = document.querySelector('#notesTransaction').value
     let transactionError = document.querySelector('#transactionError')
     let csrftoken = getToken('csrftoken');
     let url = '/add_transaction'
 
-    if (value == null || account == null) {
+    if (value == null || id == null) {
         transactionError.textContent = 'The value field and the account field has to be filled out';
         transactionError.classList.remove('hidden');
     } else {
@@ -407,7 +440,7 @@ function addTransaction() {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrftoken
             },
-            body: JSON.stringify({date: date, value: value, currency: currency, recipient: recipient, account: account, notes: notes})
+            body: JSON.stringify({date: date, value: value, currency: currency, recipient: recipient, id: id, notes: notes})
         })
         .then(response => {
             if (response.ok) {
@@ -506,6 +539,72 @@ function deleteTransactionFunc(id) {
         console.error('Error:', error);
     });
 };
+
+// add account function
+function addAccount() {
+    let name = document.querySelector('#nameAddAccount').value
+    let alias = document.querySelector('#aliasAddAccount').value
+    let currency = document.querySelector('#currencyAddAccount').value
+    let addAccountError = document.querySelector('#addAccountError')
+    let csrftoken = getToken('csrftoken');
+    let url = '/add_account'
+
+    if (name == null) {
+        addAccountError.textContent = 'The name field has to be filled out';
+        addAccountError.classList.remove('hidden');
+    } else {
+        addAccountError.textContent = '';
+        addAccountError.classList.add('hidden');
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({name: name, alias: alias, currency: currency})
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                console.error('Add account failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+}
+
+// update account function
+function updateAccount(id) {
+    let name = document.querySelector('#nameUpdateAccount').value
+    let alias = document.querySelector('#aliasUpdateAccount').value
+    let currency = document.querySelector('#currencyUpdateAccount').value
+    let updateAccountError = document.querySelector('#updateAccountError')
+    let csrftoken = getToken('csrftoken');
+    let url = '/update_account'
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({id: id, name: name, alias: alias, currency: currency})
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            console.error('Add account failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 
 // delete account function
 function deleteAccountFunc(id) {
