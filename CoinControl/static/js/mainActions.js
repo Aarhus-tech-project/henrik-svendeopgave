@@ -49,7 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 transaction['value'] = transactionValue;
                 transaction['date'] = formattedDate;
-            })            
+            })
+            
+            const currencyInput = document.querySelector('#currencyTransaction');
+            const tooltipElement = document.querySelector('[data-tip]');
+        
+            currencyInput.addEventListener('focus', () => {
+                tooltipElement.classList.add('show-tooltip');
+            });
+        
+            currencyInput.addEventListener('blur', () => {
+                tooltipElement.classList.remove('show-tooltip');
+            });
         }
     } else {
         document.querySelector('#userName').classList.remove('cursor-pointer', 'hover:opacity-70');
@@ -264,8 +275,6 @@ function openModal(type, id = null) {
         let formattedDate = `${year}-${month}-${day}`;
 
         document.querySelector('#dateTransaction').value = formattedDate
-        document.querySelector('#currencyTransaction').value = 'DKK (default)'
-
 
     } else if (type === 'updateTransaction') {
         document.querySelector('#modalUpdateTransaction').classList.remove('hidden');
