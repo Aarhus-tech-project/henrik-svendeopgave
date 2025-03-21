@@ -47,7 +47,10 @@ def add_transaction(req):
         try:
             money = Money(value, currency)
         except:
-            money = Money(value, 'DKK')
+            try:
+                money = Money(value, account.valuta)
+            except:
+                money = Money(value, 'DKK')
 
         print('date:', date, 'value:', value, 'currency:', currency, 'recipient:', recipient, 'account:', account, 'notes:', notes, 'money:', money)
 

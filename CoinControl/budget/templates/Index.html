@@ -174,7 +174,9 @@
                             <div class='flex flex-col mt-5 p-3' id='transactionFormBox'>
                                 <input class='rounded-md m-2' type="date" name="date" id="dateTransaction" placeholder='Date (default today)'>
                                 <input class='rounded-md m-2' type="number" name="value" id="valueTransaction" placeholder='Transaction value'>
-                                <input class='rounded-md m-2' type="text" name="currency" id="currencyTransaction" placeholder='Currency (USD, DKK...)'>
+                                <div data-tip="Default currency is account currency">
+                                    <input class='rounded-md m-2' type="text" name="currency" id="currencyTransaction" placeholder='Currency (USD, DKK...)'>
+                                </div>
                                 <input class='rounded-md m-2' type="text" name="recipient" id="recipientTransaction" placeholder='Recipient'>
                                 <input class='rounded-md m-2' type="text" name="account" id="accountTransaction" placeholder='Account'>
                                 <textarea class='max-h-20 rounded-md m-2' name="notes" id="notesTransaction" placeholder='notes'></textarea>
@@ -222,6 +224,43 @@
             </div>
         </div>
     {% endblock modal %}
-        
+    
+    <script type=text/javascript>
+        document.addEventListener('click', (e) =>  {
+            let updateAccountBtns = document.querySelectorAll('.updateAccountBtn')
+
+            updateAccountBtns.forEach(btn => {
+                if (btn.contains(e.target)) {
+                    updateAccountId = parseInt(btn.getAttribute('id').split('updateAccountBtn')[1])
+                    if (updateAccountId) {
+                        
+                        {% for account in accounts %}
+                            if ({{account.id}} == updateAccountId) {
+                                document.querySelector('#nameUpdateAccount').value = '{{account.name}}'
+                                document.querySelector('#aliasUpdateAccount').value = '{{account.alias}}'
+                                document.querySelector('#currencyUpdateAccount').value = '{{account.valuta}}' 
+                            }
+                        {% endfor %}
+                               
+                    }
+                }
+            })
+        })
+
+        function checkTransactionAccountId() {
+
+            {% for account in accounts %}              
+                
+                if ({{account.name}} == document.querySelector('#accountTransaction').value) {
+                    document.querySelector('#idTransaction').value = '{{account.id}}'
+                } else if ('{{account.alias}}' == document.querySelector('#accountTransaction').value) {
+                   document.querySelector('#idTransaction').value = '{{account.id}}'
+                }
+
+            {% endfor %}
+
+            addTransaction()
+        }
+    </script>
 {% endblock content %}
     
