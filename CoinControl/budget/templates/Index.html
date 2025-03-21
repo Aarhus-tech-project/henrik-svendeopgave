@@ -4,9 +4,9 @@
 {% block content %}
     <script type='text/javascript'>
         let transactions = []
-
+        let updateAccountId = null
         
-        {% for item in transactions %}
+        {% for item in transactions.object_list %}
             if ('{{item.value}}'.includes('-')) {
                 transactions.push({
                     id: '{{ item.id }}',
@@ -59,7 +59,7 @@
                 </div>
                 <div class='flex flex-col w-full h-full overflow-auto text-center px-4' id='transactionsBox'>
                     
-                    {% for item in transactions %}
+                    {% for item in transactions.object_list %}
                         <div class='transaction flex w-full min-h-10 items-center justify-around cursor-pointer border border-black rounded-md my-3 hover:waa' id='transaction{{item.id}}'>
                             <h1 class='max-w-1/4' id='date{{item.id}}'>{{item.date}}</h1>
                             <h1 class='max-w-1/4' id='value{{item.id}}'>{{item.value}}</h1>
@@ -74,6 +74,18 @@
                                 
                         </div>    
                     {% endfor %}
+
+                    {% if transactions.has_previous or transactions.has_next %}
+                        <center class='mt-16 mb-3'>
+                            {% if transactions.has_previous %}
+                                <a href="?page={{transactions.previous_page_number}}"><</a>
+                            {% endif %}
+                            <span>Page {{transactions.number}} of {{p.num_pages}}</span>
+                            {%if transactions.has_next %}
+                                <a href="?page={{transactions.next_page_number}}">></a>
+                            {% endif %}
+                        </center>
+                    {% endif %}
                         
                 </div>
             </div>
@@ -172,6 +184,7 @@
                         <form action="{% url 'add_transaction' %}" method='post' id='transactionForm'>
                             {% csrf_token %}
                             <div class='flex flex-col mt-5 p-3' id='transactionFormBox'>
+                                <input class='hidden rounded-md m-2' type="number" name="id" id="idTransaction" placeholder='Id'>
                                 <input class='rounded-md m-2' type="date" name="date" id="dateTransaction" placeholder='Date (default today)'>
                                 <input class='rounded-md m-2' type="number" name="value" id="valueTransaction" placeholder='Transaction value'>
                                 <input class='rounded-md m-2' type="text" name="currency" id="currencyTransaction" placeholder='Currency (USD, DKK...)'>
@@ -180,7 +193,7 @@
                                 <textarea class='max-h-20 rounded-md m-2' name="notes" id="notesTransaction" placeholder='notes'></textarea>
                             </div>
                             <div class='flex flex-col'>
-                                <button type='button' onclick='addTransaction()' class='hover:opacity-80 text-md' id='addTransactionBtn'>Add transaction</button>
+                                <button type='button' onclick='checkTransactionAccountId()' class='hover:opacity-80 text-md' id=btnAddTransaction'>Add transaction</button>
                             </div>
                         </form>
                     </div>
@@ -212,16 +225,112 @@
                         </form>
                     </div>
                 {% endblock updateTransaction %}
-                    
-                {% block account %}
-                {% endblock account %}
+
+                {% block addAccount %}
+                    <div class='hidden place-items-center mx-5' id='modalAddAccount'>
+                        <h1 class='text-2xl max-w-96 whitespace-nowrap overflow-hidden overflow-ellipsis'>Add account</h1>
+                        <p class="max-w-72 text-center text-red-500 hidden" id='addAccountError'></p>
+                        
+                        {% if error %}
+                            <p class="text-red-500">{{ error }}</p>
+                        {% endif %}
+                        
+                        <form action="{% url 'add_account' %}" method='post' id='addAccountForm' autocomplete="off">
+                            {% csrf_token %}
+                            <div class='flex flex-col mt-5 p-3' id='addAccountBox'>
+                                <input class='rounded-md m-2' type="text" name="name" id="nameAddAccount" placeholder='Account name'>
+                                <input class='rounded-md m-2' type="text" name="alias" id="aliasAddAccount" placeholder='Account alias (preferred)'>
+                                <input class='rounded-md m-2' type="text" name="currency" id="currencyAddAccount" placeholder='Currency (USD, DKK...)'>
+                            </div>
+                            <div class='flex flex-col'>
+                                <button type='button' onclick='addAccount()' class='hover:opacity-80 text-md' id='addAccountBtn'>Add account</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endblock addAccount %}
                 
+                {% block accountList %}
+                    <div class='hidden w-56 place-items-center mx-5' id='modalAccountList'>
+                        
+                        {% for account in accounts %}
+                            
+                            {% if account.alias %}
+                                <button onclick='openModal("updateAccount", {{account.id}})' class='updateAccountBtn w-full text-center py-1 hover:opacity-70' id='updateAccountBtn{{account.id}}'>account {{account.alias}}</button>    
+                            {% else %}
+                                <button onclick='openModal("updateAccount", {{account.id}})' class='updateAccountBtn w-full text-center py-1 hover:opacity-70' id='updateAccountBtn{{account.id}}'>account {{account.name}}</button>
+                            {% endif %}
+                                
+                        {% endfor %}
+                            
+                    </div>
+                {% endblock accountList %}
+                    
                 {% block updateAccount %}
+                    <div class='hidden place-items-center mx-5' id='modalUpdateAccount'>
+                        <h1 class='text-2xl max-w-96 whitespace-nowrap overflow-hidden overflow-ellipsis'>Update account</h1>
+                        <p class="max-w-72 text-center text-red-500 hidden" id='updateAccountError'></p>
+                        
+                        {% if error %}
+                            <p class="text-red-500">{{ error }}</p>
+                        {% endif %}
+                        
+                        <form action="{% url 'update_account' %}" method='post' id='updateAccountForm' autocomplete="off">
+                            {% csrf_token %}
+                            <div class='flex flex-col mt-5 p-3' id='updateAccountBox'>
+                                <input class='rounded-md m-2' type="text" name="name" id="nameUpdateAccount" placeholder='Account name'>
+                                <input class='rounded-md m-2' type="text" name="alias" id="aliasUpdateAccount" placeholder='Account alias (preferred)'>
+                                <input class='rounded-md m-2' type="text" name="currency" id="currencyUpdateAccount" placeholder='Currency (USD, DKK...)'>
+                            </div>
+                            <div class='flex flex-col'>
+                                <button type='button' onclick='updateAccount()' class='hover:opacity-80 text-md' id='BtnUpdateAccount'>Update account</button>
+                                <button type='button' onclick='dialogOpen("deleteAccount")' class='hover:opacity-80 text-sm text-red-500 mt-3' id='deleteAccountBtn'>Delete account</button>
+                            </div>
+                        </form>
+                    </div>
                 {% endblock updateAccount %}
                                         
             </div>
         </div>
     {% endblock modal %}
-        
+    
+    <script type='text/javascript'>
+        function checkTransactionAccountId() {
+
+            {% for account in accounts %}              
+                
+                if ({{account.name}} == document.querySelector('#accountTransaction').value) {
+                    document.querySelector('#idTransaction').value = '{{account.id}}'
+                } else if ('{{account.alias}}' == document.querySelector('#accountTransaction').value) {
+                   document.querySelector('#idTransaction').value = '{{account.id}}'
+                }
+
+            {% endfor %}
+            
+            addTransaction()
+        }
+    </script>
+    <script type=text/javascript>
+        document.addEventListener('click', (e) =>  {
+            let updateAccountBtns = document.querySelectorAll('.updateAccountBtn')
+
+
+            updateAccountBtns.forEach(btn => {
+                if (btn.contains(e.target)) {
+                    updateAccountId = parseInt(btn.getAttribute('id').split('updateAccountBtn')[1])
+                    if (updateAccountId) {
+                        
+                        {% for account in accounts %}
+                            if ({{account.id}} == updateAccountId) {
+                                document.querySelector('#nameUpdateAccount').value = '{{account.name}}'
+                                document.querySelector('#aliasUpdateAccount').value = '{{account.alias}}'
+                                document.querySelector('#currencyUpdateAccount').value = '{{account.valuta}}' 
+                            }
+                        {% endfor %}
+                               
+                    }
+                }
+            })
+        })
+    </script>
 {% endblock content %}
     
