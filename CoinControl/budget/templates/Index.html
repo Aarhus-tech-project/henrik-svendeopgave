@@ -242,7 +242,9 @@
                             <div class='flex flex-col mt-5 p-3' id='addAccountBox'>
                                 <input class='rounded-md m-2' type="text" name="name" id="nameAddAccount" placeholder='Account name'>
                                 <input class='rounded-md m-2' type="text" name="alias" id="aliasAddAccount" placeholder='Account alias (preferred)'>
-                                <input class='rounded-md m-2' type="text" name="currency" id="currencyAddAccount" placeholder='Currency (USD, DKK...)'>
+                                <div data-tip="Default currency is DKK">
+                                    <input class='rounded-md m-2' type="text" name="currency" id="currencyAddAccount" placeholder='Currency (USD, DKK...)'>
+                                </div>
                             </div>
                             <div class='flex flex-col'>
                                 <button type='button' onclick='addAccount()' class='hover:opacity-80 text-md' id='addAccountBtn'>Add account</button>
