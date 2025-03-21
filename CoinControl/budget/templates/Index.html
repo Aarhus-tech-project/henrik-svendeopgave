@@ -255,17 +255,19 @@
                 
                 {% block accountList %}
                     <div class='hidden w-56 place-items-center mx-5' id='modalAccountList'>
-                        
-                        {% for account in accounts %}
+                        <div class='w-full max-h-64 place-items-center overflow-auto'>
                             
-                            {% if account.alias %}
-                                <button onclick='openModal("updateAccount", {{account.id}})' class='updateAccountBtn w-full text-center py-1 hover:opacity-70' id='updateAccountBtn{{account.id}}'>account {{account.alias}}</button>    
-                            {% else %}
-                                <button onclick='openModal("updateAccount", {{account.id}})' class='updateAccountBtn w-full text-center py-1 hover:opacity-70' id='updateAccountBtn{{account.id}}'>account {{account.name}}</button>
-                            {% endif %}
+                            {% for account in accounts %}
                                 
-                        {% endfor %}
+                                {% if account.alias %}
+                                    <button onclick='openModal("updateAccount", {{account.id}})' class='updateAccountBtn w-full text-center py-1 hover:opacity-70' id='updateAccountBtn{{account.id}}'>account {{account.alias}}</button>    
+                                {% else %}
+                                    <button onclick='openModal("updateAccount", {{account.id}})' class='updateAccountBtn w-full text-center py-1 hover:opacity-70' id='updateAccountBtn{{account.id}}'>account {{account.name}}</button>
+                                {% endif %}
+                                    
+                            {% endfor %}
                             
+                        </div>
                     </div>
                 {% endblock accountList %}
                     
