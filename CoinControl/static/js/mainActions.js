@@ -51,14 +51,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 transaction['date'] = formattedDate;
             })
             
-            const currencyInput = document.querySelector('#currencyTransaction');
+            const currencyTransaction = document.querySelector('#currencyTransaction');
+            const currencyAddAccount = document.querySelector('#currencyAddAccount');
             const tooltipElement = document.querySelector('[data-tip]');
         
-            currencyInput.addEventListener('focus', () => {
+            currencyTransaction.addEventListener('focus', () => {
                 tooltipElement.classList.add('show-tooltip');
             });
         
-            currencyInput.addEventListener('blur', () => {
+            currencyTransaction.addEventListener('blur', () => {
+                tooltipElement.classList.remove('show-tooltip');
+            });
+        
+            currencyAddAccount.addEventListener('focus', () => {
+                tooltipElement.classList.add('show-tooltip');
+            });
+        
+            currencyAddAccount.addEventListener('blur', () => {
                 tooltipElement.classList.remove('show-tooltip');
             });
         }
