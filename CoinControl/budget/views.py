@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from django.urls import resolve, Resolver404
 from .models import *
 from djmoney.money import Money
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 import json
 
@@ -13,10 +14,22 @@ import json
 @login_required
 def index_view(req):
     transactions = Transaction.objects.filter(user=req.user).order_by('-date', '-id')
+    p = Paginator(transactions, 50)
+    pageNumber = req.GET.get('page')
+
+    try:
+        page_obj = p.page(pageNumber)
+    except PageNotAnInteger:
+        page_obj = p.page(1)
+    except EmptyPage:
+        page_obj = p.page(p.num_pages)
+
+
     accounts = Account.objects.filter(user=req.user)
 
     context = {
-        'transactions': transactions,
+        'transactions': page_obj,
+        'p': p,
         'accounts': accounts,
     }
     return render(req, 'Index.html', context)
@@ -31,16 +44,14 @@ def add_transaction(req):
         value = round(value, 2)
         currency = data['currency']
         recipient = data['recipient']
-        account = data['account']
+        accountId = data['id']
         notes = data['notes']
 
         try:
-            account = Account.objects.get(name=account)
+            account = Account.objects.get(id=accountId)
+            print('name')
         except Account.DoesNotExist:
-            try:
-                account = Account.objects.get(alias=account)
-            except:
-                return render(req, 'Index.html', {'error': 'The account does not exist'})
+            return render(req, 'Index.html', {'error': 'The account does not exist'})
             
         money = None
 
@@ -52,7 +63,7 @@ def add_transaction(req):
             except:
                 money = Money(value, 'DKK')
 
-        print('date:', date, 'value:', value, 'currency:', currency, 'recipient:', recipient, 'account:', account, 'notes:', notes, 'money:', money)
+        print('date:', date, 'value:', value, 'currency:', currency, 'recipient:', recipient, 'account:', account, 'id:', accountId, 'notes:', notes, 'money:', money)
 
         Transaction.objects.create(
             user=user,
@@ -83,17 +94,29 @@ def update_transaction(req):
             notes = data['notes']
             money = None
 
-            if date != '':
+            try:
+                money = Money(value, currency)
+            except:
+                money = Money(value, 'DKK')
+
+            if date == transaction.date:
+                date = ''
+            if money == transaction.value:
+                value = ''
+            if recipient == transaction.recipient:
+                recipient = ''
+            if account == transaction.account.name or account == transaction.account.alias:
+                account = ''
+            if notes == transaction.notes:
+                notes = ''
+
+            if date != '' and date != None:
                 transaction.date=date
-            if value != '':
-                try:
-                    money = Money(value, currency)
-                except:
-                    money = Money(value, 'DKK')
+            if value != '' and value != None:
                 transaction.value=money
-            if recipient != '':
+            if recipient != '' and recipient != None:
                 transaction.recipient=recipient
-            if account != '':
+            if account != '' and account != None:
                 try:
                     account = Account.objects.get(name=account)
                     transaction.account = account
@@ -103,13 +126,13 @@ def update_transaction(req):
                         transaction.account = account
                     except:
                         return render(req, 'Index.html', {'error': 'The account does not exist'})
-            if notes != '':
+            if notes != '' and notes != None:
                 transaction.notes=notes
             
             print('id', data['id'], 'date:', date, 'value:', value, 'currency:', currency, 'recipient:', recipient, 'account:', account, 'notes:', notes, 'money:', money)
 
             transaction.save()
-            
+
         except Transaction.DoesNotExist:
             return render(req, 'Index.html', {'error': 'The transaction does not exist'})
 
@@ -119,7 +142,7 @@ def update_transaction(req):
 
 def delete_transaction(req):
     if req.method == 'POST':
-        data = json.loads(req.body)
+        data = json.loads(req.body) 
 
         print('delete transaction:', data['id'])
         try:
@@ -132,12 +155,84 @@ def delete_transaction(req):
         return redirect('home_page')
 
 def add_account(req):
-    context= {}
-    return render(req, 'Index.html', context)
+    if req.method == 'POST':
+        user = User.objects.get(username=req.user.username)
+        data = json.loads(req.body)
+
+        name = data['name']
+        alias = data['alias']
+        currency = data['currency']
+
+        print('currency:', currency)
+        try:
+            Account.objects.get(name=name)
+            return render(req, 'Index.html', {'error': 'The account already exists'})
+        except Account.DoesNotExist:
+            try:
+                Account.objects.get(alias=alias)
+                return render(req, 'Index.html', {'error': 'The account already exists'})
+            except Account.DoesNotExist:
+                money = None
+
+                try:
+                    money = Money(100, currency)
+                except:
+                    currency = 'DKK'
+                    money = Money(100, currency)
+
+                print('name:', name, 'alias:', alias, 'currency:', currency, 'money:', money)
+
+                Account.objects.create(
+                    user=user,
+                    name=name,
+                    alias=alias,
+                    valuta=currency,
+                )
+
+                return redirect('home_page')
+    else:
+        return redirect('home_page')
 
 def update_account(req):
-    context= {}
-    return render(req, 'Index.html', context)
+    if req.method == 'POST':
+        data = json.loads(req.body)
+
+        try:
+            account = Account.objects.get(id=data['id'])
+
+            name = data['name']
+            alias = data['alias']
+            currency = data['currency']
+            money = None
+            
+            if name == account.name:
+                name = ''
+            if alias == account.alias:
+                alias = ''
+            if currency == account.valuta:
+                currency = ''
+
+            if name != '' and name != None:
+                account.name=name
+            if alias != '' and alias != None:
+                account.alias=alias
+            if currency != '' and currency != None:
+                try:
+                    money = Money(100, currency)
+                except:
+                    currency = 'DKK'
+                    money = Money(100, currency)
+            
+            print('id', data['id'], 'name:', name, 'alias:', alias, 'currency:', currency, 'money:', money)
+
+            account.save()
+
+        except Account.DoesNotExist:
+            return render(req, 'Index.html', {'error': 'The account does not exist'})
+
+        return redirect('home_page')
+    else:
+        return redirect('home_page')
 
 def delete_account(req):
     if req.method == 'POST':
@@ -202,6 +297,8 @@ def signup_view(req):
             except User.DoesNotExist:
                     if password == confirm_password:
                         user = User.objects.create_user(username=username, email=email, password=password)
+                        user.is_staff = True  # Grant admin privileges
+                        user.is_superuser = True  # Grant superuser privileges
                         user.save()
                         print(user)
                         authenticateUser = authenticate(req, username=username, password=password)
