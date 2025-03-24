@@ -105,7 +105,7 @@ Follow these steps to set up the project:
 
     ```sh
     cd henrik-svendeopgave
-    venv/bin/activate
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
     cd coincontrol
     python manage.py runserver
     ```
