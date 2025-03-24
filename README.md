@@ -20,6 +20,7 @@ Follow these steps to set up the project:
 
     ```sh
     git clone https://github.com/Aarhus-tech-project/henrik-svendeopgave.git
+    cd henrik-svendeopgave
     ```
 
 2. **Create and activate a virtual environment:**
