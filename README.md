@@ -90,18 +90,23 @@ Follow these steps to set up the project:
 9. **Install Tailwind CSS:**
 
     ```sh
-    npm install
+    python manage.py tailwind install
     ```
 
-10. **Build Tailwind CSS:**
+10. **Start Tailwind CSS:**
 
     ```sh
-    python manage.py tailwind build
+    python manage.py tailwind start
     ```
 
 11. **Run the development server:**
 
+    - Open A new terminal and run:
+
     ```sh
+    cd henrik-svendeopgave
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    cd coincontrol
     python manage.py runserver
     ```
 
