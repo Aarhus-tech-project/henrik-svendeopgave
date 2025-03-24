@@ -3,5 +3,5 @@ django-tailwind
 django-browser-reload
 django-encrypted-model-fields
 django-money
-"django-money[exchange]"
+django-money[exchange]
 python-dotenv
