@@ -28,7 +28,6 @@ Follow these steps to set up the project:
     ```sh
     python -m virtualenv venv
     source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-    cd coincontrol
     ```
 
 3. **Install the required Python packages:**
@@ -78,6 +77,7 @@ Follow these steps to set up the project:
 7. **Apply database migrations:**
 
     ```sh
+    cd coincontrol
     python manage.py migrate
     ```
 
