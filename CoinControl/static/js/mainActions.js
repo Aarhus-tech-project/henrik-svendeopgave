@@ -28,17 +28,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (transactions.length > 0) {
             transactions.forEach(transaction => {
                 let transactionValue = parseFloat(transaction['value'].replace(',', '').replace(/^[^\d]+/, ''));
+                let totalValue = parseFloat(transaction['total'].replace(',', '').replace(/^[^\d]+/, ''));
                 let transactionDate = transaction['date']
                 let dateObject = new Date(transactionDate); // Convert to Date object
                 let currency = transaction['value'].replace(/[0-9.,-]+/g, '').trim();
+                let totalCurrency = transaction['total'].replace(/[0-9.,-]+/g, '').trim();
                 let value = document.querySelector(`#value${transaction['id']}`)
+                let total = document.querySelector(`#total${transaction['id']}`)
 
                 if (transaction['negative'] == true) {
                     value.textContent = `${currency} -${transactionValue.toFixed(2)}`
                     value.classList.add('text-red-800')
-                }else {
+                } else {
                     value.textContent = `${currency} ${transactionValue.toFixed(2)}`
                     value.classList.remove('text-red-800')
+                }
+
+                if (transaction['total'].includes('-')) {
+                    total.textContent = `${totalCurrency} -${totalValue.toFixed(2)}`
+                    total.classList.add('text-red-800')
+                } else {
+                    total.textContent = `${totalCurrency} ${totalValue.toFixed(2)}`
+                    total.classList.remove('text-red-800')
                 }
                 
                 // Format the date to YYYY-MM-DD
