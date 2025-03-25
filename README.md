@@ -10,6 +10,7 @@ Before you begin, ensure you have the following installed on your system:
 
 - Python 3.8 or higher
 - pip (Python package installer)
+- virtualenv (for the virtual environment)
 - Node.js and npm (for Tailwind CSS)
 
 ### Installation
