@@ -6,6 +6,21 @@ from djmoney.money import Money
 from djmoney.contrib.exchange.models import convert_money
 from django.utils import timezone
 
+def convert_function(value, currency):
+    try:
+        return convert_money(value, currency)
+    except:
+        STATIC_EXCHANGE_RATES = {
+            'DKK': 1.0,
+            'USD': 0.157,  # 1 DKK = 0.157 USD
+            'EUR': 0.134,  # 1 DKK = 0.134 EUR
+        }
+        if currency in STATIC_EXCHANGE_RATES:
+            new_value = value.amount * STATIC_EXCHANGE_RATES[currency]
+            return Money(new_value, currency)
+        else:
+            raise ValueError(f"Currency {currency} not supported in STATIC_EXCHANGE_RATES")
+
 # Create your models here.
 class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -19,7 +34,7 @@ class Account(models.Model):
         converted_transactions = []
         for transaction in transactions:
             if transaction.value_currency != self.valuta:
-                convertedValue = convert_money(transaction.value, self.valuta)
+                convertedValue = convert_function(transaction.value, self.valuta)
                 transaction.value = convertedValue
             converted_transactions.append(transaction)
         return converted_transactions
@@ -42,7 +57,7 @@ class Transaction(models.Model):
     def get_rate(self):
         if self.value_currency != 'DKK':
             money = Money(100, self.value_currency)
-            conversion_rate = convert_money(money, 'DKK')
+            conversion_rate = convert_function(money, 'DKK')
             return conversion_rate
 
 class Goal(models.Model):

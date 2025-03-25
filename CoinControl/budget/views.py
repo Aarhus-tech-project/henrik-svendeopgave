@@ -42,7 +42,7 @@ def get_valid_money(value, currencies):
     for curr in currencies:
         try:
             return Money(value, curr)
-        except ValueError:
+        except:
             continue
     return None
 
@@ -155,15 +155,17 @@ def add_account(req):
     
     name = data['name']
     alias = data['alias']
-    currency = data.get('currency', 'DKK')
+    currency = data.get('currency')
 
     if Account.objects.filter(name=name, user=req.user).exists():
         return render(req, 'Index.html', {'error': 'The account name already exists'})
     if Account.objects.filter(alias=alias, user=req.user).exists():
         return render(req, 'Index.html', {'error': 'The account alias already exists'})
     
-    if currency not in VALID_CURRENCIES:
-        return render(req, 'Index.html', {'error': 'Invalid currency'})
+    if currency and currency not in VALID_CURRENCIES:
+        currency = 'DKK'
+    elif not currency or currency == '':
+        currency = 'DKK'
     
     Account.objects.create(
         user=req.user,
