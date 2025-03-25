@@ -11,15 +11,19 @@ def convert_function(value, currency):
         return convert_money(value, currency)
     except:
         STATIC_EXCHANGE_RATES = {
-            'DKK': 1.0,
-            'USD': 0.157,  # 1 DKK = 0.157 USD
-            'EUR': 0.134,  # 1 DKK = 0.134 EUR
+            'DKK_to_USD': 0.157,  # 1 DKK = 0.157 USD
+            'DKK_to_EUR': 0.134,  # 1 DKK = 0.134 EUR
+            'USD_to_DKK': 6.37,   # 1 USD = 6.37 DKK
+            'USD_to_EUR': 0.85,   # 1 USD = 0.85 EUR
+            'EUR_to_DKK': 7.46,   # 1 EUR = 7.46 DKK
+            'EUR_to_USD': 1.18,   # 1 EUR = 1.18 USD
         }
-        if currency in STATIC_EXCHANGE_RATES:
-            new_value = value.amount * STATIC_EXCHANGE_RATES[currency]
+        exchange_string = f'{value.currency}_to_{currency}'
+        if exchange_string in STATIC_EXCHANGE_RATES:
+            new_value = float(value.amount) * STATIC_EXCHANGE_RATES[exchange_string]
             return Money(new_value, currency)
         else:
-            raise ValueError(f"Currency {currency} not supported in STATIC_EXCHANGE_RATES")
+            raise ValueError(f"Currency {value.currency} not supported in STATIC_EXCHANGE_RATES")
 
 # Create your models here.
 class Account(models.Model):
