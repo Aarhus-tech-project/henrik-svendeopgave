@@ -120,7 +120,7 @@ Follow these steps to set up the project:
 - Log in with the superuser credentials you created.
 - Add, update, and delete transactions and accounts.
 
-note: You are using teh static exchange rates (Supported currencies: DKK, USD and EUR)
+note: You are using the static exchange rates (Supported currencies: DKK, USD and EUR)
 
 ## License
 
